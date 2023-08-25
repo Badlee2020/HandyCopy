@@ -4,7 +4,7 @@
 # Function name: write_log
 # Purpose: To write logs to a specified log file.
 # Parameters: 
-#   1) Log level (e.g., "ERROR", "INFO", "DEBUG", etc.)
+#   1) Log level for the message (DEBUG, INFO, WARN, ERROR)
 #   2) Log message
 #
 # Usage: 
@@ -13,8 +13,15 @@
 write_log() {
   
   # Retrieve the first argument passed to the function, which is the log level.
-  local level="$1"
+  local log_level="$1"
   
+  declare -A log_levels=( ["DEBUG"]=0 ["INFO"]=1 ["WARN"]=2 ["ERROR"]=3 )
+
+  # If the log level of the message is less than the global minimal log level, return
+  if [[ ${log_levels[$log_level]} < ${log_levels[$MIN_LEVEL]} ]]; then
+    return
+  fi
+
   # 'shift' is a shell built-in command that shifts positional parameters to the left.
   # Here, it's used to remove the first argument (log level) so that "$*" 
   # can represent the whole log message.
@@ -29,7 +36,7 @@ write_log() {
   # Write the log message to the log file. The format is:
   # [Date and Time] - [Log Level]: [Log Message]
   # The ">>" operator appends the log message to the end of the $LOG_FILE.
-  echo "${LOGTIME} - ${level}: ${message}" >> $LOG_FILE
+  echo "${LOGTIME} - ${log_level}: ${message}" >> $LOG_FILE
 }
 
 #############################################################################
